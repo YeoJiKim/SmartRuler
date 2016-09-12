@@ -1,18 +1,12 @@
 package com.example.administrator.smartruler;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
+
 import java.util.List;
 
 import android.content.Intent;
 import android.hardware.Camera;
-import android.hardware.Camera.PictureCallback;
-import android.media.MediaScannerConnection;
 
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -20,23 +14,19 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.Window;
-import android.widget.Button;
 
 import android.app.Activity;
-import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
 
-    static final String TAG =  "CAMERA ACTIVITY";
+  //  static final String TAG =  "CAMERA ACTIVITY";
 
     //Camera object
     Camera mCamera;
@@ -44,16 +34,13 @@ public class MainActivity extends AppCompatActivity
     SurfaceView surfaceView;
     //Preview surface handle for callback
     SurfaceHolder surfaceHolder;
-    //Camera button
-    Button btnCapture;
     //Note if preview windows is on.
-    boolean previewing;
+    boolean previewing = false;
     int mCurrentCamIndex = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -62,11 +49,8 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-                if (previewing)
-                    mCamera.takePicture(shutterCallback, rawPictureCallback,
-                            jpegPictureCallback);
+                CatchPicture catchPicture = new CatchPicture(MainActivity.this,mCamera);
+                catchPicture.capture(previewing);
             }
         });
 
@@ -82,7 +66,6 @@ public class MainActivity extends AppCompatActivity
         surfaceView = (SurfaceView) findViewById(R.id.surfaceView1);
         surfaceHolder = surfaceView.getHolder();
         surfaceHolder.addCallback(new SurfaceViewCallback());
-        //surfaceHolder.addCallback(this);
         surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
     }
 
@@ -123,77 +106,9 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    android.hardware.Camera.ShutterCallback shutterCallback = new android.hardware.Camera.ShutterCallback() {
-        @Override
-        public void onShutter() {
-        }
-    };
-
-    android.hardware.Camera.PictureCallback rawPictureCallback = new android.hardware.Camera.PictureCallback() {
-        @Override
-        public void onPictureTaken(byte[] arg0, Camera arg1) {
-
-        }
-    };
-
-    PictureCallback jpegPictureCallback = new PictureCallback() {
-        @Override
-        public void onPictureTaken(byte[] arg0, Camera arg1) {
-
-            String fileName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
-                    .toString()
-                    + File.separator
-                    + "PicTest_" + System.currentTimeMillis() + ".jpg";
-            File file = new File(fileName);
-            if (!file.getParentFile().exists()) {
-                file.getParentFile().mkdir();
-            }
-
-            try {
-                BufferedOutputStream bos = new BufferedOutputStream(
-                        new FileOutputStream(file));
-                bos.write(arg0);
-                bos.flush();
-                bos.close();
-                scanFileToPhotoAlbum(file.getAbsolutePath());
-                Toast.makeText(MainActivity.this, "[Test] Photo take and store in" + file.toString(),Toast.LENGTH_LONG).show();
-            } catch (Exception e) {
-                Toast.makeText(MainActivity.this, "Picture Failed" + e.toString(),
-                        Toast.LENGTH_LONG).show();
-            }
-        };
-    };
-
-    public void scanFileToPhotoAlbum(String path) {
-
-        MediaScannerConnection.scanFile(MainActivity.this,
-                new String[] { path }, null,
-                new MediaScannerConnection.OnScanCompletedListener() {
-
-                    public void onScanCompleted(String path, Uri uri) {
-                        Log.i("TAG", "Finished scanning " + path);
-                    }
-                });
-    }
     private final class SurfaceViewCallback implements android.view.SurfaceHolder.Callback {
-        public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3)
-        {
-            if (previewing) {
-                mCamera.stopPreview();
-                previewing = false;
-            }
-
-            try {
-                mCamera.setPreviewDisplay(arg0);
-                mCamera.startPreview();
-                previewing = true;
-                setCameraDisplayOrientation(MainActivity.this, mCurrentCamIndex, mCamera);
-            } catch (Exception e) {}
-        }
         public void surfaceCreated(SurfaceHolder holder) {
-//				mCamera = Camera.open();
-            //change to front camera
-            mCamera = openFrontFacingCameraGingerbread();
+            mCamera = Camera.open(0);
             // get Camera parameters
             Camera.Parameters params = mCamera.getParameters();
 
@@ -203,34 +118,26 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
+        public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3)
+        {
+            if (previewing) {
+                mCamera.stopPreview();
+                previewing = false;
+            }
+            try {
+                mCamera.setPreviewDisplay(arg0);
+                mCamera.startPreview();
+                previewing = true;
+                setCameraDisplayOrientation(MainActivity.this, mCurrentCamIndex, mCamera);
+            } catch (Exception e) {}
+        }
+
         public void surfaceDestroyed(SurfaceHolder holder) {
             mCamera.stopPreview();
             mCamera.release();
             mCamera = null;
             previewing = false;
         }
-    }
-
-    private Camera openFrontFacingCameraGingerbread() {
-        int cameraCount = 0;
-        Camera cam = null;
-        Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
-        cameraCount = Camera.getNumberOfCameras();
-
-        for (int camIdx = 0; camIdx < cameraCount; camIdx++) {
-            Camera.getCameraInfo(camIdx, cameraInfo);
-            //    if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-            if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK){
-                try {
-                    cam = Camera.open(camIdx);
-                    mCurrentCamIndex = camIdx;
-                } catch (RuntimeException e) {
-                    Log.e(TAG, "Camera failed to open: " + e.getLocalizedMessage());
-                }
-            }
-        }
-
-        return cam;
     }
 
     //根据横竖屏自动调节preview方向，Starting from API level 14, this method can be called when preview is active.
