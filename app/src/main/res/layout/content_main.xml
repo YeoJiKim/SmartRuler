@@ -12,13 +12,22 @@
     tools:context="com.example.administrator.smartruler.MainActivity"
     tools:showIn="@layout/app_bar_main">
 
-    <SurfaceView
-        android:id="@+id/surfaceView1"
+    <!--<SurfaceView-->
+        <!--android:id="@+id/surfaceView1"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_alignParentLeft="true"-->
+        <!--android:layout_alignParentRight="true" >-->
+    <!--</SurfaceView>-->
+
+    <FrameLayout
+        android:id="@+id/camera_preview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true" >
-    </SurfaceView>
+        android:layout_alignParentRight="true"
+        />
 
 </RelativeLayout>

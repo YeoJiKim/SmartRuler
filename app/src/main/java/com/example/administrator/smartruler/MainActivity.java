@@ -1,11 +1,8 @@
 package com.example.administrator.smartruler;
 
-
-import java.util.List;
-
 import android.content.Intent;
+import android.graphics.Rect;
 import android.hardware.Camera;
-
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -14,29 +11,21 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
-import android.view.Surface;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
+import android.widget.Button;
+import android.widget.FrameLayout;
 
-import android.app.Activity;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+      implements  NavigationView.OnNavigationItemSelectedListener ,View.OnClickListener{
 
-
-  //  static final String TAG =  "CAMERA ACTIVITY";
-
-    //Camera object
-    Camera mCamera;
-    //Preview surface
-    SurfaceView surfaceView;
-    //Preview surface handle for callback
-    SurfaceHolder surfaceHolder;
-    //Note if preview windows is on.
-    boolean previewing = false;
-    int mCurrentCamIndex = 0;
+    protected Camera mCamera;
+    protected CameraPreview mPreview;
+    protected FrameLayout preview;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,15 +33,6 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                CatchPicture catchPicture = new CatchPicture(MainActivity.this,mCamera);
-                catchPicture.capture(previewing);
-            }
-        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -63,10 +43,52 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        surfaceView = (SurfaceView) findViewById(R.id.surfaceView1);
-        surfaceHolder = surfaceView.getHolder();
-        surfaceHolder.addCallback(new SurfaceViewCallback());
-        surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        // Create an instance of Camera
+        mCamera = getCameraInstance();
+
+        // Create our Preview view and set it as the content of our activity.
+        mPreview = new CameraPreview(this, MainActivity.this,mCamera);
+        preview = (FrameLayout) findViewById(R.id.camera_preview);
+        preview.addView(mPreview);
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        assert fab != null;
+        fab.setOnClickListener( this);
+
+
+
+        Intent startServiceIntent = new Intent(this,OrientationService.class);
+        startService(startServiceIntent);
+        //Log.d("MainActivity","!!!!!"+OrientationDetector.getD());
+    }
+
+    @Override
+    protected  void onPause(){
+        super.onPause();
+        mCamera.stopPreview();
+    }
+
+    @Override
+    protected  void onDestroy(){
+        super.onDestroy();
+        if (mCamera != null){
+            mCamera.release();        // release the camera for other applications
+            mCamera = null;
+        }
+        Intent stopServiceIntent = new Intent(this,OrientationService.class);
+        stopService(stopServiceIntent);
+    }
+
+    @Override
+    public void onClick(View v){
+        switch(v.getId()){
+            case R.id.fab:
+                CatchPicture catchPicture = new CatchPicture(MainActivity.this, mCamera);
+                catchPicture.capture( mPreview.getPreviewing());
+                break;
+            default:
+                break;
+        }
     }
 
     @Override
@@ -106,68 +128,14 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    private final class SurfaceViewCallback implements android.view.SurfaceHolder.Callback {
-        public void surfaceCreated(SurfaceHolder holder) {
-            mCamera = Camera.open(0);
-            // get Camera parameters
-            Camera.Parameters params = mCamera.getParameters();
-
-            List<String> focusModes = params.getSupportedFocusModes();
-            if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
-                // Autofocus mode is supported
-            }
+    public static Camera getCameraInstance(){
+        Camera c = null;
+        try {
+            c = Camera.open(0); // attempt to get a Camera instance
         }
-
-        public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3)
-        {
-            if (previewing) {
-                mCamera.stopPreview();
-                previewing = false;
-            }
-            try {
-                mCamera.setPreviewDisplay(arg0);
-                mCamera.startPreview();
-                previewing = true;
-                setCameraDisplayOrientation(MainActivity.this, mCurrentCamIndex, mCamera);
-            } catch (Exception e) {}
+        catch (Exception e){
+            // Camera is not available (in use or does not exist)
         }
-
-        public void surfaceDestroyed(SurfaceHolder holder) {
-            mCamera.stopPreview();
-            mCamera.release();
-            mCamera = null;
-            previewing = false;
-        }
-    }
-
-    //根据横竖屏自动调节preview方向，Starting from API level 14, this method can be called when preview is active.
-    private static void setCameraDisplayOrientation(Activity activity,int cameraId, Camera camera)
-    {
-        Camera.CameraInfo info = new Camera.CameraInfo();
-        Camera.getCameraInfo(cameraId, info);
-        int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
-
-        //degrees  the angle that the picture will be rotated clockwise. Valid values are 0, 90, 180, and 270.
-        //The starting position is 0 (landscape).
-        int degrees = 0;
-        switch (rotation)
-        {
-            case Surface.ROTATION_0: degrees = 0; break;
-            case Surface.ROTATION_90: degrees = 90; break;
-            case Surface.ROTATION_180: degrees = 180; break;
-            case Surface.ROTATION_270: degrees = 270; break;
-        }
-        int result;
-        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT)
-        {
-            result = (info.orientation + degrees) % 360;
-            result = (360 - result) % 360;  // compensate the mirror
-        }
-        else
-        {
-            // back-facing
-            result = (info.orientation - degrees + 360) % 360;
-        }
-        camera.setDisplayOrientation(result);
+        return c; // returns null if camera is unavailable
     }
 }
