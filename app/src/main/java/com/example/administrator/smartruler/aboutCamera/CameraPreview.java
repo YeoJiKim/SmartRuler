@@ -1,4 +1,4 @@
-package com.example.administrator.smartruler;
+package com.example.administrator.smartruler.aboutCamera;
 
 import android.app.Activity;
 import android.content.Context;
@@ -24,7 +24,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     public CameraPreview(Context context, Activity activity,Camera camera) {
         super(context);
-       this.mCamera = camera;
+        this.mCamera = camera;
         this.mActivity = activity;
 
         // Install a SurfaceHolder.Callback so we get notified when the
@@ -46,9 +46,20 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             mCamera.startPreview();
             previewing = true;
 
+            Camera.Parameters params = mCamera.getParameters();
 
+            if (params.getMaxNumMeteringAreas() > 0){ // check that metering areas are supported
+                List<Camera.Area> meteringAreas = new ArrayList<Camera.Area>();
+
+                Rect areaRect1 = new Rect(-100, -100, 100, 100);    // specify an area in center of image
+                meteringAreas.add(new Camera.Area(areaRect1, 600)); // set weight to 60%
+                Rect areaRect2 = new Rect(300, -1000, 1000, -300);  // specify an area in upper right of image
+                meteringAreas.add(new Camera.Area(areaRect2, 400)); // set weight to 40%
+                params.setMeteringAreas(meteringAreas);
+            }
+            mCamera.setParameters(params);
         } catch (IOException e) {
-            //Log.d(TAG, "Error setting camera preview: " + e.getMessage());
+            Log.d("TAG", "Error setting camera preview: " + e.getMessage());
         }
     }
 
@@ -80,7 +91,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
            setCameraDisplayOrientation(mActivity, 0, mCamera);
 
         } catch (Exception e){
-           // Log.d(TAG, "Error starting camera preview: " + e.getMessage());
+            Log.d("TAG", "Error starting camera preview: " + e.getMessage());
         }
     }
 

@@ -1,10 +1,12 @@
-package com.example.administrator.smartruler;
+package com.example.administrator.smartruler.navigationItems;
 
 import android.app.Activity;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Window;
 import android.widget.VideoView;
+
+import com.example.administrator.smartruler.R;
 
 
 /**

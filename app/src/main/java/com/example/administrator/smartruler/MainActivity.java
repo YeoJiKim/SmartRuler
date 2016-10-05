@@ -1,7 +1,6 @@
 package com.example.administrator.smartruler;
 
 import android.content.Intent;
-import android.graphics.Rect;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -11,14 +10,13 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.FrameLayout;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.example.administrator.smartruler.aboutCamera.*;
+import com.example.administrator.smartruler.navigationItems.*;
+import com.example.administrator.smartruler.sensor.*;
 
 public class MainActivity extends AppCompatActivity
       implements  NavigationView.OnNavigationItemSelectedListener ,View.OnClickListener{
@@ -50,12 +48,11 @@ public class MainActivity extends AppCompatActivity
         mPreview = new CameraPreview(this, MainActivity.this,mCamera);
         preview = (FrameLayout) findViewById(R.id.camera_preview);
         preview.addView(mPreview);
+        //drawDetectRect();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         assert fab != null;
         fab.setOnClickListener( this);
-
-
 
         Intent startServiceIntent = new Intent(this,OrientationService.class);
         startService(startServiceIntent);
@@ -122,11 +119,11 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_send) {
 
         }
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
 
     public static Camera getCameraInstance(){
         Camera c = null;

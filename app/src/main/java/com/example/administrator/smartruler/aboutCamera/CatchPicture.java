@@ -1,4 +1,4 @@
-package com.example.administrator.smartruler;
+package com.example.administrator.smartruler.aboutCamera;
 
 import android.content.Context;
 import android.hardware.Camera;
@@ -19,7 +19,7 @@ public class CatchPicture {
     Camera mCamera;
     private  Context mContext;
 
-    CatchPicture(Context context,Camera camera){
+    public CatchPicture(Context context,Camera camera){
         this.mContext = context;
         this.mCamera = camera;
     }

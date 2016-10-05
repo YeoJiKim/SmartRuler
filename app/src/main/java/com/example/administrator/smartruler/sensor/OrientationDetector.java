@@ -1,4 +1,4 @@
-package com.example.administrator.smartruler;
+package com.example.administrator.smartruler.sensor;
 
 import android.content.Context;
 import android.hardware.Sensor;

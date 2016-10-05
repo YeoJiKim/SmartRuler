@@ -25,10 +25,10 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".VideoActivity">
+        <activity android:name=".navigationItems.VideoActivity">
             </activity>
 
-        <service android:name=".OrientationService">
+        <service android:name=".sensor.OrientationService">
             </service>
 
     </application>
