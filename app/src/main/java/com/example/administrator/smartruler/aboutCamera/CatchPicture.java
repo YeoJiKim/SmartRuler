@@ -24,9 +24,9 @@ public class CatchPicture {
         this.mCamera = camera;
     }
 
-    public  void capture(boolean previewing){
-        if(previewing){
-            mCamera.takePicture(shutterCallback, rawPictureCallback, jpegPictureCallback);
+    public  void capture(){
+        if(CameraPreview.mPreviewing){
+            mCamera.takePicture(null, null, jpegPictureCallback);
         }
     }
 

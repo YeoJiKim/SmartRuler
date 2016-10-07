@@ -1,7 +1,6 @@
 package com.example.administrator.smartruler;
 
 import android.content.Intent;
-import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -12,7 +11,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.FrameLayout;
 
 import com.example.administrator.smartruler.aboutCamera.*;
 import com.example.administrator.smartruler.navigationItems.*;
@@ -21,14 +19,15 @@ import com.example.administrator.smartruler.sensor.*;
 public class MainActivity extends AppCompatActivity
       implements  NavigationView.OnNavigationItemSelectedListener ,View.OnClickListener{
 
-    protected Camera mCamera;
-    protected CameraPreview mPreview;
-    protected FrameLayout preview;
+    ScannerView scannerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        scannerView = new ScannerView(this);
+        scannerView.setContentView(R.layout.activity_main);
+        setContentView(scannerView);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -41,15 +40,6 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        // Create an instance of Camera
-        mCamera = getCameraInstance();
-
-        // Create our Preview view and set it as the content of our activity.
-        mPreview = new CameraPreview(this, MainActivity.this,mCamera);
-        preview = (FrameLayout) findViewById(R.id.camera_preview);
-        preview.addView(mPreview);
-        //drawDetectRect();
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         assert fab != null;
         fab.setOnClickListener( this);
@@ -60,18 +50,21 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    protected  void  onResume(){
+        super.onResume();
+        scannerView.startCamera(-1);
+    }
+
+
+    @Override
     protected  void onPause(){
         super.onPause();
-        mCamera.stopPreview();
+        scannerView.stopCamera();
     }
 
     @Override
     protected  void onDestroy(){
         super.onDestroy();
-        if (mCamera != null){
-            mCamera.release();        // release the camera for other applications
-            mCamera = null;
-        }
         Intent stopServiceIntent = new Intent(this,OrientationService.class);
         stopService(stopServiceIntent);
     }
@@ -80,8 +73,8 @@ public class MainActivity extends AppCompatActivity
     public void onClick(View v){
         switch(v.getId()){
             case R.id.fab:
-                CatchPicture catchPicture = new CatchPicture(MainActivity.this, mCamera);
-                catchPicture.capture( mPreview.getPreviewing());
+                CatchPicture catchPicture = new CatchPicture(MainActivity.this,scannerView.mCamera);
+                catchPicture.capture();
                 break;
             default:
                 break;
@@ -124,15 +117,4 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-
-    public static Camera getCameraInstance(){
-        Camera c = null;
-        try {
-            c = Camera.open(0); // attempt to get a Camera instance
-        }
-        catch (Exception e){
-            // Camera is not available (in use or does not exist)
-        }
-        return c; // returns null if camera is unavailable
-    }
 }

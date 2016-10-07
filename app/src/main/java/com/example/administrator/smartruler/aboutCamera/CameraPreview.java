@@ -1,127 +1,192 @@
 package com.example.administrator.smartruler.aboutCamera;
 
-import android.app.Activity;
 import android.content.Context;
-import android.graphics.Rect;
+import android.content.res.Configuration;
+import android.graphics.Point;
 import android.hardware.Camera;
+import android.os.Handler;
+import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.WindowManager;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Administrator on 2016/9/13.
- */
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
-    private SurfaceHolder mHolder;
-    private Camera mCamera = null;
-    boolean previewing = false;
-    Activity mActivity;
+    private static final String TAG = "CameraPreview";
 
-    public CameraPreview(Context context, Activity activity,Camera camera) {
+    private Camera mCamera;
+   // private Handler mAutoFocusHandler;
+    public static boolean mPreviewing = true;
+    //private boolean mAutoFocus = true;
+    private boolean mSurfaceCreated = false;
+    private Camera.PreviewCallback mPreviewCallback;
+
+    public CameraPreview(Context context) {
         super(context);
-        this.mCamera = camera;
-        this.mActivity = activity;
-
-        // Install a SurfaceHolder.Callback so we get notified when the
-        // underlying surface is created and destroyed.
-        mHolder = getHolder();
-        mHolder.addCallback(this);
-        // deprecated setting, but required on Android versions prior to 3.0
-        mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
     }
 
-    public boolean getPreviewing(){
-        return previewing;
+    public CameraPreview(Context context, AttributeSet attrs) {
+        super(context, attrs);
     }
 
-    public void surfaceCreated(SurfaceHolder holder) {
-        // The Surface has been created, now tell the camera where to draw the preview.
-        try {
-            mCamera.setPreviewDisplay(holder);
-            mCamera.startPreview();
-            previewing = true;
+    public void setCamera(Camera camera, Camera.PreviewCallback previewCallback) {
+        mCamera = camera;
+        mPreviewCallback = previewCallback;
+        //mAutoFocusHandler = new Handler();
+    }
 
-            Camera.Parameters params = mCamera.getParameters();
-
-            if (params.getMaxNumMeteringAreas() > 0){ // check that metering areas are supported
-                List<Camera.Area> meteringAreas = new ArrayList<Camera.Area>();
-
-                Rect areaRect1 = new Rect(-100, -100, 100, 100);    // specify an area in center of image
-                meteringAreas.add(new Camera.Area(areaRect1, 600)); // set weight to 60%
-                Rect areaRect2 = new Rect(300, -1000, 1000, -300);  // specify an area in upper right of image
-                meteringAreas.add(new Camera.Area(areaRect2, 400)); // set weight to 40%
-                params.setMeteringAreas(meteringAreas);
+    public void initCameraPreview() {
+        if (mCamera != null) {
+            getHolder().addCallback(this);
+            getHolder().setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+            if (mPreviewing) {
+                requestLayout();
+            } else {
+                showCameraPreview();
             }
-            mCamera.setParameters(params);
-        } catch (IOException e) {
-            Log.d("TAG", "Error setting camera preview: " + e.getMessage());
         }
     }
 
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        // empty. Take care of releasing the Camera preview in your activity.
-        previewing = false;
+    @Override
+    public void surfaceCreated(SurfaceHolder surfaceHolder) {
+
+        mSurfaceCreated = true;
     }
 
-    public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-        // If your preview can change or rotate, take care of those events here.
-        // Make sure to stop the preview before resizing or reformatting it.
-
-        if (mHolder.getSurface() == null){
-            // preview surface does not exist
+    @Override
+    public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i2, int i3) {
+        if (surfaceHolder.getSurface() == null) {
             return;
         }
+        stopCameraPreview();
+        showCameraPreview();
+    }
 
-        // stop preview before making changes
-        if (previewing) {
-            mCamera.stopPreview();
-            previewing = false;
-        }
+    @Override
+    public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+        mSurfaceCreated = false;
+        stopCameraPreview();
+    }
 
-        // start preview with new settings
-        try {
-            mCamera.setPreviewDisplay(mHolder);
-            mCamera.startPreview();
-            previewing = true;
-           setCameraDisplayOrientation(mActivity, 0, mCamera);
-
-        } catch (Exception e){
-            Log.d("TAG", "Error starting camera preview: " + e.getMessage());
+    public void showCameraPreview() {
+        if (mCamera != null) {
+            try {
+                mPreviewing = true;
+              //  setupCameraParameters();
+                mCamera.setPreviewDisplay(getHolder());
+                mCamera.setDisplayOrientation(getDisplayOrientation());
+                mCamera.setOneShotPreviewCallback(mPreviewCallback);
+                mCamera.startPreview();
+            } catch (Exception e) {
+                Log.e(TAG, e.toString(), e);
+            }
         }
     }
 
-    //根据横竖屏自动调节preview方向，Starting from API level 14, this method can be called when preview is active.
-    private static void setCameraDisplayOrientation(Activity activity, int cameraId, Camera camera) {
-        Camera.CameraInfo info = new Camera.CameraInfo();
-        Camera.getCameraInfo(cameraId, info);
-        int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
 
-        //degrees  the angle that the picture will be rotated clockwise. Valid values are 0, 90, 180, and 270.
-        //The starting position is 0 (landscape).
-        int degrees = 0;
-        switch (rotation)
-        {
-            case Surface.ROTATION_0: degrees = 0; break;
-            case Surface.ROTATION_90: degrees = 90; break;
-            case Surface.ROTATION_180: degrees = 180; break;
-            case Surface.ROTATION_270: degrees = 270; break;
+    public void stopCameraPreview() {
+        if (mCamera != null) {
+            try {
+                mPreviewing = false;
+                mCamera.cancelAutoFocus();
+                mCamera.setOneShotPreviewCallback(null);
+                mCamera.stopPreview();
+            } catch (Exception e) {
+                Log.e(TAG, e.toString(), e);
+            }
         }
+    }
+
+//    public void setupCameraParameters() {
+//        Camera.Size optimalSize = getOptimalPreviewSize();
+//        Camera.Parameters parameters = mCamera.getParameters();
+//        parameters.setPreviewSize(optimalSize.width, optimalSize.height);
+//        mCamera.setParameters(parameters);
+//    }
+
+    public int getDisplayOrientation() {
+        Camera.CameraInfo info = new Camera.CameraInfo();
+        Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_BACK, info);
+        WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+
+        int rotation = display.getRotation();
+        int degrees = 0;
+        switch (rotation) {
+            case Surface.ROTATION_0:
+                degrees = 0;
+                break;
+            case Surface.ROTATION_90:
+                degrees = 90;
+                break;
+            case Surface.ROTATION_180:
+                degrees = 180;
+                break;
+            case Surface.ROTATION_270:
+                degrees = 270;
+                break;
+        }
+
         int result;
-        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT)
-        {
+        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
             result = (info.orientation + degrees) % 360;
             result = (360 - result) % 360;  // compensate the mirror
-        }
-        else
-        {
-            // back-facing
+        } else {  // back-facing
             result = (info.orientation - degrees + 360) % 360;
         }
-        camera.setDisplayOrientation(result);
+        return result;
     }
+
+//    private Camera.Size getOptimalPreviewSize() {
+//        if (mCamera == null) {
+//            return null;
+//        }
+//
+//        List<Camera.Size> sizes = mCamera.getParameters().getSupportedPreviewSizes();
+//        Point screenResolution = DisplayUtils.getScreenResolution(getContext());
+//        int w = screenResolution.x;
+//        int h = screenResolution.y;
+//        if (DisplayUtils.getScreenOrientation(getContext()) == Configuration.ORIENTATION_PORTRAIT) {
+//            w = screenResolution.y;
+//            h = screenResolution.x;
+//        }
+//
+//
+//        final double ASPECT_TOLERANCE = 0.1;
+//        double targetRatio = (double) w / h;
+//        if (sizes == null) return null;
+//
+//        Camera.Size optimalSize = null;
+//        double minDiff = Double.MAX_VALUE;
+//
+//        int targetHeight = h;
+//
+//        // Try to find an size match aspect ratio and size
+//        for (Camera.Size size : sizes) {
+//            double ratio = (double) size.width / size.height;
+//            if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) continue;
+//            if (Math.abs(size.height - targetHeight) < minDiff) {
+//                optimalSize = size;
+//                minDiff = Math.abs(size.height - targetHeight);
+//            }
+//        }
+//
+//        // Cannot find the one match the aspect ratio, ignore the requirement
+//        if (optimalSize == null) {
+//            minDiff = Double.MAX_VALUE;
+//            for (Camera.Size size : sizes) {
+//                if (Math.abs(size.height - targetHeight) < minDiff) {
+//                    optimalSize = size;
+//                    minDiff = Math.abs(size.height - targetHeight);
+//                }
+//            }
+//        }
+//        return optimalSize;
+//    }
+
 }
+
