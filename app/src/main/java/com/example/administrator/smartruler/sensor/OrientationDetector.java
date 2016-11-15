@@ -13,7 +13,12 @@ public class OrientationDetector implements SensorEventListener {
     private float[] accelerometerValues = new float[3];
     private float[] magneticValues = new float[3];
     private float[] R = new float[9];
-    public static float[] values = new float[3];//包含3个轴上的角度
+    public static float[] values = new float[3];
+
+    public static double angleOfX;
+    public static double angleOfY;
+    public static double angleOfZ;
+    public static float resultOfDistance;
 
     public OrientationDetector(Context context){
         super();
@@ -26,20 +31,28 @@ public class OrientationDetector implements SensorEventListener {
             }else if(sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD){
                 magneticValues = sensorEvent.values.clone();
             }
+        SensorManager.getRotationMatrix(R,null,accelerometerValues,magneticValues);
+        SensorManager.getOrientation(R,values);
 
+        angleOfX = values[1];
+        angleOfY = values[2];
+        angleOfZ = values[0];
 
-            SensorManager.getRotationMatrix(R,null,accelerometerValues,magneticValues);
-            SensorManager.getOrientation(R,values);
-
+        getDistance();
     }
+
+    private void getDistance(){
+        double a = Math.cos(angleOfY);
+        double b =  Math.cos(angleOfX);
+        float result= (float)Math.asin( a*b);
+        resultOfDistance = (float)(1.5/Math.tan(result));
+    }
+
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         // TODO Auto-generated method stub
     }
 
-//    public static float getD(){
-//        return (float)Math.toDegrees(values[0]);
-//    }
 
 }

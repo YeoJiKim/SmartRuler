@@ -13,6 +13,8 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.WindowManager;
 
+import com.example.administrator.smartruler.R;
+
 import java.util.List;
 
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
@@ -24,6 +26,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     //private boolean mAutoFocus = true;
     private boolean mSurfaceCreated = false;
     private Camera.PreviewCallback mPreviewCallback;
+
 
     public CameraPreview(Context context) {
         super(context);

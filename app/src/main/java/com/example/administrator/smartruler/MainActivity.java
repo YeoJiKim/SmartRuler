@@ -1,7 +1,10 @@
 package com.example.administrator.smartruler;
 
+
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -11,22 +14,55 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 
-import com.example.administrator.smartruler.aboutCamera.*;
-import com.example.administrator.smartruler.navigationItems.*;
-import com.example.administrator.smartruler.sensor.*;
+import com.example.administrator.smartruler.aboutCamera.CatchPicture;
+import com.example.administrator.smartruler.aboutCamera.ScannerView;
+import com.example.administrator.smartruler.navigationItems.VideoActivity;
+import com.example.administrator.smartruler.sensor.OrientationDetector;
+import com.example.administrator.smartruler.sensor.OrientationService;
+
 
 public class MainActivity extends AppCompatActivity
-      implements  NavigationView.OnNavigationItemSelectedListener ,View.OnClickListener{
+        implements NavigationView.OnNavigationItemSelectedListener,View.OnClickListener {
 
     ScannerView scannerView;
+    public static final int GETDISTANCE = 1;
+    public static final int GETHEIGHT = 2;
+    public int directionMeasure = 0;
+
+    private TextView resultOfMeasure;
+    private Button changDirectionOfMeasure;
+
+    private OrientationService mService = new OrientationService();
+
+    private Thread thread;
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case GETDISTANCE:
+                     resultOfMeasure.setText("" + OrientationDetector.resultOfDistance);
+               break;
+                case GETHEIGHT:
+                    resultOfMeasure.setText("Height");
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
         super.onCreate(savedInstanceState);
         scannerView = new ScannerView(this);
         scannerView.setContentView(R.layout.activity_main);
         setContentView(scannerView);
+
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -42,44 +78,115 @@ public class MainActivity extends AppCompatActivity
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         assert fab != null;
-        fab.setOnClickListener( this);
+        fab.setOnClickListener(this);
 
-        Intent startServiceIntent = new Intent(this,OrientationService.class);
-        startService(startServiceIntent);
-        //Log.d("MainActivity","!!!!!"+OrientationDetector.getD());
+        resultOfMeasure = (TextView) findViewById(R.id.resultOfMeasure);
+        changDirectionOfMeasure = (Button) findViewById(R.id.changDirectionOfMeasure);
+        assert changDirectionOfMeasure!= null;
+        changDirectionOfMeasure.setOnClickListener(this);
+
+        if (thread == null) {
+            thread = new Thread() {
+                @Override
+                public void run() {
+                    while (true) {
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        if (OrientationService.FLAG) {
+
+                            Message message = new Message();
+                            if (directionMeasure % 2 == 0) {
+                                message.what = GETDISTANCE;
+                            } else {
+                                message.what = GETHEIGHT;
+                            }
+                            handler.sendMessage(message);
+                        }
+                    }
+                }
+            };
+            thread.start();
+        }
+
     }
 
     @Override
-    protected  void  onResume(){
+    protected void onResume() {
         super.onResume();
         scannerView.startCamera(-1);
+
+        startOrientationService();
     }
 
+    private void startOrientationService(){
+        Intent startServiceIntent = new Intent(this, OrientationService.class);
+        startService(startServiceIntent);
+    }
+//private ServiceConnection connection = new ServiceConnection() {
+//    @Override
+//    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+//
+//        mService = ((OrientationService.OrientationBinder)iBinder).getService();
+//        mService.registerCallback(mCallback);
+//    }
+//
+//    @Override
+//    public void onServiceDisconnected(ComponentName componentName) {
+//        mService = null;
+//    }
+//};
 
     @Override
-    protected  void onPause(){
+    protected void onPause() {
         super.onPause();
         scannerView.stopCamera();
     }
 
     @Override
-    protected  void onDestroy(){
+    protected void onDestroy() {
         super.onDestroy();
-        Intent stopServiceIntent = new Intent(this,OrientationService.class);
+        stopOrientationService();
+    }
+
+    private void stopOrientationService(){
+        Intent stopServiceIntent = new Intent(this, OrientationService.class);
         stopService(stopServiceIntent);
     }
 
+
+
     @Override
-    public void onClick(View v){
-        switch(v.getId()){
+    public void onClick(View v) {
+        switch (v.getId()) {
             case R.id.fab:
-                CatchPicture catchPicture = new CatchPicture(MainActivity.this,scannerView.mCamera);
+                CatchPicture catchPicture = new CatchPicture(MainActivity.this, scannerView.mCamera);
                 catchPicture.capture();
                 break;
+
+            case R.id.changDirectionOfMeasure:
+                directionMeasure++;
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Message message = new Message();
+                        if (directionMeasure % 2 == 0) {
+                            message.what = GETDISTANCE;
+                        } else {
+                            message.what = GETHEIGHT;
+                        }
+                        handler.sendMessage(message);
+                    }
+                }).start();
+                break;
+
             default:
                 break;
         }
     }
+
 
     @Override
     public void onBackPressed() {
@@ -102,7 +209,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
-            Intent intent = new Intent(MainActivity.this,VideoActivity.class);
+            Intent intent = new Intent(MainActivity.this, VideoActivity.class);
             startActivity(intent);
 
         } else if (id == R.id.nav_manage) {

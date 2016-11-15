@@ -20,10 +20,10 @@ public class ScannerView extends FrameLayout implements Camera.PreviewCallback {
         addView(mPreview = new CameraPreview(getContext()));
     }
 
-    public ScannerView(Context context, AttributeSet attributeSet) {
-        super(context, attributeSet);
-        addView(mPreview = new CameraPreview(getContext()));
-    }
+//    public ScannerView(Context context, AttributeSet attributeSet) {
+//        super(context, attributeSet);
+//        addView(mPreview = new CameraPreview(getContext()));
+//    }
 
 
     public void setContentView(int res) {
