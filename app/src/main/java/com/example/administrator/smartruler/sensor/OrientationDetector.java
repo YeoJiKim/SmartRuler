@@ -13,12 +13,13 @@ public class OrientationDetector implements SensorEventListener {
     private float[] accelerometerValues = new float[3];
     private float[] magneticValues = new float[3];
     private float[] R = new float[9];
-    public static float[] values = new float[3];
+    private static float[] values = new float[3];
 
-    public static double angleOfX;
-    public static double angleOfY;
-    public static double angleOfZ;
+    private static double angleOfX;  //pitch
+    private static double angleOfY;  //roll
+    private static double angleOfZ;
     public static float resultOfDistance;
+    public static float resultOfHeight;
 
     public OrientationDetector(Context context){
         super();
@@ -39,6 +40,7 @@ public class OrientationDetector implements SensorEventListener {
         angleOfZ = values[0];
 
         getDistance();
+        getHeight();
     }
 
     private void getDistance(){
@@ -48,11 +50,15 @@ public class OrientationDetector implements SensorEventListener {
         resultOfDistance = (float)(1.5/Math.tan(result));
     }
 
+    private void getHeight(){
+        double a = Math.cos(angleOfY);
+        double b =  Math.cos(angleOfX);
+        float result= (float)Math.asin( a*b);
+        resultOfHeight = (float)(3/Math.tan(result));//test
+
+    }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // TODO Auto-generated method stub
     }
-
-
 }

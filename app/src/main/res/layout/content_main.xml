@@ -50,7 +50,6 @@
                 android:src="@mipmap/cross"
                 android:layout_centerInParent="true"/>
 
-
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
@@ -84,26 +83,55 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/grey_60000000"/>
+
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/grey_60000000"
-        android:orientation="vertical">
 
-        <Button
-            android:text="Button"
-            android:layout_width="146dp"
-            android:layout_height="wrap_content"
-            android:id="@+id/changDirectionOfMeasure" />
-
-        <TextView
-            android:text="TextView"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/resultOfMeasure" />
-    </LinearLayout>
+            android:background="@color/grey_60000000"
+            android:orientation="horizontal">
+
+            <Button
+                android:text="水平测距"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/getDistance_btn" />
+
+            <TextView
+                android:text="点击按钮开始测水平距离"
+                android:textColor="@color/white"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:gravity="center"
+                android:id="@+id/resultOfDistance_text" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/grey_60000000"
+            android:orientation="horizontal">
+            <Button
+                android:text="垂直测距"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/getHeight_btn" />
+
+            <TextView
+                android:text="点击按钮开始测垂直距离"
+                android:textColor="@color/white"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:gravity="center"
+                android:id="@+id/resultOfHeight_text" />
+        </LinearLayout>
+
 
 </LinearLayout>
 

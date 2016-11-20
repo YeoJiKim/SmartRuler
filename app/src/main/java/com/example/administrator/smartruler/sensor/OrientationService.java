@@ -16,6 +16,10 @@ public class OrientationService extends Service {
     private SensorManager  sensorManager;
     private OrientationDetector detector;
 
+    public static final int GETDISTANCE_MSG = 1;
+    public static final int GETHEIGHT_MSG = 2;
+
+
     private final IBinder mBinder = new OrientationBinder();
     public class OrientationBinder extends Binder {
         public OrientationService getService(){
@@ -57,4 +61,33 @@ public class OrientationService extends Service {
             sensorManager.unregisterListener(detector);
         }
     }
+
+    public interface ICallback{
+        void distanceChanged(float distance);
+        void heightChanged(float height);
+    }
+
+    private ICallback mCallback;
+
+    public void registerCallback(ICallback mCallback) {
+        this.mCallback = mCallback;
+    }
+
+    public void measurementChanged(final int msg){
+        new Thread(new Runnable(){
+            @Override
+            public void run(){
+                if(msg == GETDISTANCE_MSG) {
+                    mCallback.distanceChanged(OrientationDetector.resultOfDistance);
+                }
+                if(msg == GETHEIGHT_MSG){
+                    mCallback.heightChanged(OrientationDetector.resultOfHeight);
+                }
+            }
+        }).start();
+
+
+    }
+
+
 }
