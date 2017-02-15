@@ -15,6 +15,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -35,20 +36,20 @@ public class MainActivity extends AppCompatActivity
     public static final int GETDISTANCE_MSG = 1;
     public static final int GETHEIGHT_MSG = 2;
 
-    private TextView resultOfHeight_text;
-    private TextView resultOfDistance_text;
-    private Button getHeight_btn;
-    private Button getDistance_btn;
+//    private TextView resultOfHeight_text;
+//    private TextView resultOfDistance_text;
+//    private Button getHeight_btn;
+//    private Button getDistance_btn;
 
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case GETDISTANCE_MSG:
-                    resultOfDistance_text.setText("" + msg.getData().getFloat("distance"));
+                    //resultOfDistance_text.setText("" + msg.getData().getFloat("distance"));
                break;
                 case GETHEIGHT_MSG:
-                    resultOfHeight_text.setText("" + msg.getData().getFloat("height"));
+                   // resultOfHeight_text.setText("" + msg.getData().getFloat("height"));
                     break;
                 default:
                     break;
@@ -76,16 +77,6 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        assert fab != null;
-        fab.setOnClickListener(this);
-
-        resultOfDistance_text = (TextView) findViewById(R.id.resultOfDistance_text);
-        resultOfHeight_text = (TextView) findViewById(R.id.resultOfHeight_text);
-        getHeight_btn = (Button) findViewById(R.id.getHeight_btn);
-        getDistance_btn = (Button) findViewById(R.id.getDistance_btn);
-        getHeight_btn.setOnClickListener(this);
-        getDistance_btn.setOnClickListener(this);
     }
 
     @Override
@@ -152,16 +143,16 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.fab:
-                CatchPicture catchPicture = new CatchPicture(MainActivity.this, ScannerView.mCamera);
-                catchPicture.capture();
-                break;
-            case R.id.getDistance_btn:
-                mService.measurementChanged(GETDISTANCE_MSG);
-                break;
-            case R.id.getHeight_btn:
-                mService.measurementChanged(GETHEIGHT_MSG);
-                break;
+//            case R.id.fab:
+//                CatchPicture catchPicture = new CatchPicture(MainActivity.this, ScannerView.mCamera);
+//                catchPicture.capture();
+//                break;
+//            case R.id.getDistance_btn:
+//                mService.measurementChanged(GETDISTANCE_MSG);
+//                break;
+//            case R.id.getHeight_btn:
+//                mService.measurementChanged(GETHEIGHT_MSG);
+//                break;
             default:
                 break;
         }
@@ -175,6 +166,22 @@ public class MainActivity extends AppCompatActivity
         } else {
             super.onBackPressed();
         }
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.toolbar, menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.screenshots:
+                CatchPicture catchPicture = new CatchPicture(MainActivity.this, ScannerView.mCamera);
+                catchPicture.capture();
+                break;
+            default:
+        }
+        return true;
     }
 
     @SuppressWarnings("StatementWithEmptyBody")

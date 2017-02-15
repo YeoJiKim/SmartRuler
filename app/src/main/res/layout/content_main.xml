@@ -13,127 +13,149 @@
     tools:showIn="@layout/app_bar_main">
 
     <LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
-
-    <TextView
-        android:id="@+id/textView17"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:background="@color/grey_60000000"
-        android:gravity="bottom|center_horizontal"
-        android:paddingBottom="15dp"
-        android:text="@string/tips"
-        android:textColor="@color/white"/>
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:background="@color/grey_60000000"
+            android:orientation="vertical">
 
-        <View
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@color/grey_60000000"/>
-
-        <RelativeLayout
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:id="@+id/scan_window">
-
-            <ImageView
-                android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/H"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/scanner_line"
-                android:src="@mipmap/cross"
-                android:layout_centerInParent="true"/>
-
-            <View
+                android:gravity="end"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginEnd="15dp"
+                android:text="h : 1.50"
+                android:textColor="@color/white"/>
+            <TextView
+                android:id="@+id/h"
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_alignParentTop="true"
-                android:background="@color/white"/>
-
-            <View
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentLeft="true"
-                android:background="@color/white"/>
-
-            <View
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:background="@color/white"/>
-
-            <View
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginEnd="15dp"
+                android:text="H : 0.00"
+                android:textColor="@color/white"/>
+            <TextView
+                android:id="@+id/H_plus_h"
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_alignParentBottom="true"
-                android:background="@color/white"/>
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginEnd="15dp"
+                android:text="h+H = 1.50"
+                android:textColor="@color/white"/>
 
-        </RelativeLayout>
+        </LinearLayout>
 
-        <View
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@color/grey_60000000"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
-    </LinearLayout>
+            <View
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@color/grey_60000000"/>
+
+            <RelativeLayout
+                android:layout_width="220dp"
+                android:layout_height="220dp"
+                android:id="@+id/scan_window">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/scanner_line"
+                    android:src="@mipmap/cross"
+                    android:layout_centerInParent="true"/>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentTop="true"
+                    android:background="@color/white"/>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentLeft="true"
+                    android:background="@color/white"/>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:background="@color/white"/>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="@color/white"/>
+
+            </RelativeLayout>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@color/grey_60000000"/>
+
+        </LinearLayout>
 
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/grey_60000000"
-            android:orientation="horizontal">
-
-            <Button
-                android:text="水平测距"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:id="@+id/getDistance_btn" />
+            android:orientation="vertical">
 
             <TextView
-                android:text="点击按钮开始测水平距离"
-                android:textColor="@color/white"
-                android:layout_width="0dp"
+                android:id="@+id/orientation"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="25dp"
+                android:text="@string/distance"
+                android:textSize="20sp"
+                android:textColor="@color/white"/>
+            <TextView
+                android:id="@+id/measurement"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:gravity="center"
-                android:id="@+id/resultOfDistance_text" />
+                android:layout_gravity="center_horizontal"
+                android:text="0"
+                android:textSize="50sp"
+                android:textColor="@color/white"/>
+            <Button
+                android:id="@+id/changeOrientation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                 android:text="changeOrientation"/>
+
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/grey_60000000"
-            android:orientation="horizontal">
-            <Button
-                android:text="垂直测距"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:id="@+id/getHeight_btn" />
+            android:orientation="horizontal"/>
 
-            <TextView
-                android:text="点击按钮开始测垂直距离"
-                android:textColor="@color/white"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:gravity="center"
-                android:id="@+id/resultOfHeight_text" />
-        </LinearLayout>
+    </LinearLayout>
 
-
-</LinearLayout>
 
 
 </RelativeLayout>

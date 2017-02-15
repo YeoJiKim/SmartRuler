@@ -26,6 +26,10 @@ public class OrientationDetector implements SensorEventListener {
     }
 
     @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
+
+    @Override
     public void onSensorChanged(SensorEvent sensorEvent){
         if(sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
                 accelerometerValues = sensorEvent.values.clone();
@@ -56,9 +60,5 @@ public class OrientationDetector implements SensorEventListener {
         float result= (float)Math.asin( a*b);
         resultOfHeight = (float)(3/Math.tan(result));//test
 
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 }
