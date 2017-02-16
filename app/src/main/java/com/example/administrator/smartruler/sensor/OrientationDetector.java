@@ -20,6 +20,9 @@ public class OrientationDetector implements SensorEventListener {
     private static double angleOfZ;
     public static float resultOfDistance;
     public static float resultOfHeight;
+    private double temp_D;
+    private double temp_H;
+
 
     public OrientationDetector(Context context){
         super();
@@ -50,15 +53,18 @@ public class OrientationDetector implements SensorEventListener {
     private void getDistance(){
         double a = Math.cos(angleOfY);
         double b =  Math.cos(angleOfX);
-        float result= (float)Math.asin( a*b);
-        resultOfDistance = (float)(1.5/Math.tan(result));
+        double result= Math.asin( a*b);
+        temp_D = (1.5/Math.tan(result));
+        resultOfDistance = (float)(Math.round(temp_D * 10) / 10.0);//保留一位小数
+
+
     }
 
     private void getHeight(){
-        double a = Math.cos(angleOfY);
-        double b =  Math.cos(angleOfX);
-        float result= (float)Math.asin( a*b);
-        resultOfHeight = (float)(3/Math.tan(result));//test
+//        double a = Math.cos(angleOfY);
+//        double b =  Math.cos(angleOfX);
+//        float result= (float)Math.asin( a*b);
+        resultOfHeight = (float) 1.88;//test
 
     }
 }

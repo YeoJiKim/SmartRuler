@@ -15,6 +15,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,32 +25,33 @@ import android.widget.TextView;
 import com.example.administrator.smartruler.aboutCamera.CatchPicture;
 import com.example.administrator.smartruler.aboutCamera.ScannerView;
 import com.example.administrator.smartruler.navigationItems.VideoActivity;
+import com.example.administrator.smartruler.sensor.OrientationDetector;
 import com.example.administrator.smartruler.sensor.OrientationService;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,View.OnClickListener {
 
-    ScannerView scannerView;
-    private OrientationService mService;
+    private static final String TAG = "MainActivity";
+    private static final int GETDISTANCE = 1;
+    private static final int GETHEIGHT = 2;
+    private int changeDirection = 1;
 
-    public static final int GETDISTANCE_MSG = 1;
-    public static final int GETHEIGHT_MSG = 2;
+    private ScannerView scannerView;
+    private OrientationService.OrientationBinder mBinder;
+    private Thread thread;
+    private TextView measurement_text;
+    private Button changeOrientation_btn;
 
-//    private TextView resultOfHeight_text;
-//    private TextView resultOfDistance_text;
-//    private Button getHeight_btn;
-//    private Button getDistance_btn;
-
-    private Handler handler = new Handler() {
+    private Handler handler = new Handler(){
         @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case GETDISTANCE_MSG:
-                    //resultOfDistance_text.setText("" + msg.getData().getFloat("distance"));
-               break;
-                case GETHEIGHT_MSG:
-                   // resultOfHeight_text.setText("" + msg.getData().getFloat("height"));
+        public void handleMessage(Message msg){
+            switch(msg.what){
+                case GETDISTANCE:
+                    measurement_text.setText(""+ msg.getData().getFloat("distance"));
+                    break;
+                case GETHEIGHT:
+                    measurement_text.setText("" + msg.getData().getFloat("height"));
                     break;
                 default:
                     break;
@@ -77,14 +79,53 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        measurement_text = (TextView)findViewById(R.id.measurement);
+        changeOrientation_btn = (Button)findViewById(R.id.changeOrientation);
+        changeOrientation_btn.setOnClickListener(this);
+
+        startOrientationService();
+
+        if(thread == null){
+            thread = new Thread(){
+              @Override
+                public void run(){
+
+                  while(true){
+                      try{
+                          Thread.sleep(500);
+                      }catch(InterruptedException e){
+                          e.printStackTrace();
+                      }
+
+                      if(OrientationService.STARTSERVICE){
+                          if(changeDirection % 2 == 1){
+                              Message msg = Message.obtain();
+                              msg.what = GETDISTANCE;
+                              Bundle data = new Bundle();
+                              data.putFloat("distance", OrientationDetector.resultOfDistance);
+                              msg.setData(data);
+                              handler.sendMessage(msg);
+
+                          }else{
+                              Message msg = Message.obtain();
+                              msg.what = GETHEIGHT;
+                              Bundle data = new Bundle();
+                              data.putFloat("height", OrientationDetector.resultOfHeight);
+                              msg.setData(data);
+                              handler.sendMessage(msg);
+                          }
+                      }
+                  }
+              }
+            };
+            thread.start();
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         scannerView.startCamera(-1);
-        startOrientationService();
-
     }
 
     private void startOrientationService(){
@@ -96,29 +137,12 @@ public class MainActivity extends AppCompatActivity
     private ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            mService = ((OrientationService.OrientationBinder)iBinder).getService();
-            mService.registerCallback(new OrientationService.ICallback(){
-                public void distanceChanged(float distance){
-                    Message msg = Message.obtain();
-                    msg.what = GETDISTANCE_MSG;
-                    Bundle data = new Bundle();
-                    data.putFloat("distance", distance);
-                    msg.setData(data);
-                    handler.sendMessage(msg);
-                }
-                public void heightChanged(float height){
-                    Message msg = Message.obtain();
-                    msg.what = GETHEIGHT_MSG;
-                    Bundle data = new Bundle();
-                    data.putFloat("height", height);
-                    msg.setData(data);
-                    handler.sendMessage(msg);
-                }
-            });
+            mBinder = (OrientationService.OrientationBinder)iBinder;
+
         }
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            mService = null;
+            mBinder = null;
         }
     };
 
@@ -143,16 +167,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-//            case R.id.fab:
-//                CatchPicture catchPicture = new CatchPicture(MainActivity.this, ScannerView.mCamera);
-//                catchPicture.capture();
-//                break;
-//            case R.id.getDistance_btn:
-//                mService.measurementChanged(GETDISTANCE_MSG);
-//                break;
-//            case R.id.getHeight_btn:
-//                mService.measurementChanged(GETHEIGHT_MSG);
-//                break;
+            case R.id.changeOrientation:
+                changeDirection++;
+                break;
             default:
                 break;
         }
