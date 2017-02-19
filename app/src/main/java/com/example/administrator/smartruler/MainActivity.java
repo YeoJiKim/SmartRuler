@@ -34,13 +34,14 @@ public class MainActivity extends AppCompatActivity
 
     private static final String TAG = "MainActivity";
     private static final int GETDISTANCE = 1;
-    private static final int GETHEIGHT = 2;
+    private static final int GETHEIGHT = 0;
     private int changeDirection = 1;
 
     private ScannerView scannerView;
     private OrientationService.OrientationBinder mBinder;
     private Thread thread;
     private TextView measurement_text;
+    private TextView orientation_text;
     private Button changeOrientation_btn;
 
     private Handler handler = new Handler(){
@@ -80,6 +81,7 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         measurement_text = (TextView)findViewById(R.id.measurement);
+        orientation_text = (TextView)findViewById(R.id.orientation);
         changeOrientation_btn = (Button)findViewById(R.id.changeOrientation);
         changeOrientation_btn.setOnClickListener(this);
 
@@ -98,7 +100,7 @@ public class MainActivity extends AppCompatActivity
                       }
 
                       if(OrientationService.STARTSERVICE){
-                          if(changeDirection % 2 == 1){
+                          if(changeDirection == GETDISTANCE){
                               Message msg = Message.obtain();
                               msg.what = GETDISTANCE;
                               Bundle data = new Bundle();
@@ -106,7 +108,7 @@ public class MainActivity extends AppCompatActivity
                               msg.setData(data);
                               handler.sendMessage(msg);
 
-                          }else{
+                          }else if(changeDirection == GETHEIGHT){
                               Message msg = Message.obtain();
                               msg.what = GETHEIGHT;
                               Bundle data = new Bundle();
@@ -168,7 +170,14 @@ public class MainActivity extends AppCompatActivity
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.changeOrientation:
-                changeDirection++;
+                changeDirection = (changeDirection + 1) % 2;
+
+                if(changeDirection == GETDISTANCE){
+                    orientation_text.setText(R.string.distance);
+                }else if(changeDirection == GETHEIGHT){
+                    orientation_text.setText(R.string.height);
+                }
+
                 break;
             default:
                 break;
