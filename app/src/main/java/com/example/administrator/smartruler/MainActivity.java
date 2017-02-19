@@ -33,9 +33,9 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,View.OnClickListener {
 
     private static final String TAG = "MainActivity";
-    private static final int GETDISTANCE = 1;
-    private static final int GETHEIGHT = 0;
-    private int changeDirection = 1;
+    public static final int GETDISTANCE = 1;
+    public static final int GETHEIGHT = 0;
+    public static int changeDirection = 1;
 
     private ScannerView scannerView;
     private OrientationService.OrientationBinder mBinder;
@@ -49,7 +49,13 @@ public class MainActivity extends AppCompatActivity
         public void handleMessage(Message msg){
             switch(msg.what){
                 case GETDISTANCE:
-                    measurement_text.setText(""+ msg.getData().getFloat("distance"));
+                    float distance = msg.getData().getFloat("distance");
+                    if(distance < 0){
+                        measurement_text.setText(R.string.error);
+                    }else {
+                        measurement_text.setText(""+ distance);
+                    }
+
                     break;
                 case GETHEIGHT:
                     measurement_text.setText("" + msg.getData().getFloat("height"));
@@ -98,7 +104,6 @@ public class MainActivity extends AppCompatActivity
                       }catch(InterruptedException e){
                           e.printStackTrace();
                       }
-
                       if(OrientationService.STARTSERVICE){
                           if(changeDirection == GETDISTANCE){
                               Message msg = Message.obtain();
@@ -171,13 +176,11 @@ public class MainActivity extends AppCompatActivity
         switch (v.getId()) {
             case R.id.changeOrientation:
                 changeDirection = (changeDirection + 1) % 2;
-
                 if(changeDirection == GETDISTANCE){
                     orientation_text.setText(R.string.distance);
                 }else if(changeDirection == GETHEIGHT){
                     orientation_text.setText(R.string.height);
                 }
-
                 break;
             default:
                 break;

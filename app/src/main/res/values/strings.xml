@@ -7,6 +7,7 @@
     <string name="distance">Distance (m)</string>
     <string name="height">Height (m)</string>
     <string name="screenshots">screenshots</string>
+    <string name="error">error!</string>
 
 
     <string name="action_settings">Settings</string>
