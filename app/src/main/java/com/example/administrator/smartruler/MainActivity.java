@@ -164,6 +164,7 @@ public class MainActivity extends AppCompatActivity
         super.onDestroy();
         stopOrientationService();
         unbindService(connection);
+        changeDirection = 1;
     }
 
     private void stopOrientationService(){
