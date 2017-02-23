@@ -1,13 +1,13 @@
-package com.example.administrator.smartruler;
+package com.example.administrator.smartruler.navigationItems;
 
 import android.app.Activity;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.Window;
 import android.widget.VideoView;
 
-import java.io.File;
+import com.example.administrator.smartruler.R;
+
 
 /**
  * Created by Administrator on 2016/8/20.
@@ -28,8 +28,6 @@ public class VideoActivity extends Activity {
     }
 
     private void  initVideoPath(){
-//        File file = new File(Environment.getExternalStorageDirectory(),"movie.3gp");
-//        videoView.setVideoPath(file.getPath());
         String uri = "android.resource://" + getPackageName() + "/" + R.raw.my_video_file;
         videoView.setVideoURI(Uri.parse(uri));
     }
