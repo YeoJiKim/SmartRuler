@@ -23,7 +23,8 @@ public class OrientationDetector implements SensorEventListener {
     private static double angleOfZ;
     private double tempD;
     private double tempH;
-    private double h = 1.5;//手机摄像头距地面的垂直距离
+//    private double h = 1.5;//手机摄像头距地面的垂直距离
+    public static double h = MainActivity.HHH;//手机摄像头距地面的垂直距离
     public static float resultOfDistance;
     public static float resultOfHeight;
 
